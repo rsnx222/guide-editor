@@ -1,31 +1,43 @@
-# This workflow will rebuild the website whenever the main branch is updated.
 name: Deploy site
 
 on:
   push:
     branches:
-      - main
+      - nick-overhaul
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  publish:  
-    permissions:
-      contents: write
-    
+  build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v3
-      
+
       - uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Install and Build
+      - name: Install & Build
         run: |
           npm ci
           npm run build
 
-      - name: Publish
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
         with:
-          folder: dist
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v2
